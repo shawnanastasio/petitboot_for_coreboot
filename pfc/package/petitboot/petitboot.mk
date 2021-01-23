@@ -4,14 +4,14 @@
 #
 ################################################################################
 
-PETITBOOT_VERSION = v1.8.0
+PETITBOOT_VERSION = v1.7.6
 PETITBOOT_SITE ?= $(call github,open-power,petitboot,$(PETITBOOT_VERSION))
 PETITBOOT_DEPENDENCIES = ncurses udev host-bison host-flex lvm2 libgpgme
 PETITBOOT_LICENSE = GPLv2
 PETITBOOT_LICENSE_FILES = COPYING
 
 PETITBOOT_AUTORECONF = YES
-PETITBOOT_AUTORECONF_OPTS = -i
+PETITBOOT_AUTORECONF_OPTS = -f -i
 PETITBOOT_GETTEXTIZE = NO
 PETITBOOT_CONF_OPTS += --with-ncurses --without-twin-x11 --without-twin-fbdev \
 	      --localstatedir=/var --with-signed-boot \
@@ -36,6 +36,13 @@ ifeq ($(BR2_PACKAGE_NCURSES_WCHAR),y)
 	PETITBOOT_CONF_OPTS += --with-ncursesw MENU_LIB=-lmenuw FORM_LIB=-lformw
 endif
 
+define PETITBOOT_PRECONFIGURE_FIXUP
+	touch $(@D)/config.rpath
+	test -d $(@D) || mkdir $(@D)/po
+	touch $(@D)/po/Makefile.in.in
+endef
+
+PETITBOOT_PRE_CONFIGURE_HOOKS += PETITBOOT_PRECONFIGURE_FIXUP
 PETITBOOT_PRE_CONFIGURE_HOOKS += PETITBOOT_PRE_CONFIGURE_BOOTSTRAP
 
 define PETITBOOT_POST_INSTALL
